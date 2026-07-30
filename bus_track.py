@@ -371,7 +371,7 @@ def cold_start_tick(system_id, vehicle_id, state, v):
         tier = 1
     elif elapsed < 180:
         tier = 2 
-    elif elapsed < 300:
+    elif elapsed < 900:
         tier = 3 
     else:
         tier = 4 #heading is not used anymore aka cant seem to get it.
@@ -412,7 +412,7 @@ def cold_start_tick(system_id, vehicle_id, state, v):
         if v_heading is not None:
             if angle_diff(v_heading, local_bearing) > 45:
                 continue
-        elif v_heading is None and elapsed < 300:
+        elif v_heading is None and elapsed < 900:
             continue
 
         if error_m >= best_error_m:
@@ -513,7 +513,11 @@ def live_tracking_tick(system_id, vehicle_id, state, v):
 
             # sanity check: skip observation if either value is suspicious
             if osrm_duration_s and osrm_duration_s > 0 and 10 < observed_duration_s < 3600:
-                ratio = max(0.6, min(2.0, observed_duration_s / osrm_duration_s))
+                is_complex = stop_sequence[prev_index][4]
+                if is_complex == 1:
+                    ratio = max(1.0, min(2.4, observed_duration_s / osrm_duration_s))
+                else:
+                    ratio = max(0.6, min(2.0, observed_duration_s / osrm_duration_s))
                 key = (system_id, state['route_name'], prev_index)
                 if key not in segment_observations:
                     segment_observations[key] = []
